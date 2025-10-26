@@ -113,7 +113,7 @@ scaffolding-mc-server-{port: uint16}。
 
 各联机客户端应根据硬件信息生成足够长的字符串，避免碰撞，并尽力保证对同一设备始终产出稳定的结果。
 
-#### 标准协议
+#### 标准请求类型
 
 ##### c:ping [核心请求类型]
 
@@ -152,7 +152,7 @@ scaffolding-mc-server-{port: uint16}。
 ##### c:player_profiles_list [核心请求类型]
 
 - 请求体：空
-- 响应体：玩家列表（包括房主）
+- 响应体：玩家列表（包括联机中心）
 - 响应体格式（JSON）：[{ name: string, machine_id: string, vendor: string, kind: 'HOST' | 'GUEST' }]
 
 #### 拓展请求类型
