@@ -104,6 +104,9 @@ scaffolding-mc-server-{port: uint16}。
 - 标准协议：由 Scaffolding-MC 规范直接规定的协议，以 c (community) 作为命名空间的全部协议；
 - 拓展协议：由社区自发实现的其他协议。
 
+所有核心协议都是标准协议。
+拓展协议的制定者可递交 SEP 来添加特定拓展协议到标准协议中。
+
 #### 字段解释
 
 ##### machine_id: string
