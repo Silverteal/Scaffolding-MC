@@ -41,19 +41,19 @@ SOFTWARE.
 
 # 协议定义
 
-## 联机房间码标准
+## 1.联机房间码标准
 
 联机中心应在 Minecraft 服务器启动后，通过密码学安全的随机数生成器，创建符合 `U/NNNN-NNNN-SSSS-SSSS` 形式的联机房间码，满足以下约束：
 
 - N 和 S 为任意大写字母（除去 I 和 O）和数字；
 - 按照 0-9、A-H、J-N、P-Z顺序映射至 \[0, 33\] 后，依“小端序”读得的整型应能被7整除。
 
-## 联机网络标准
+## 2.联机网络标准
 
 EasyTier 网络名称应为 `scaffolding-mc-NNNN-NNNN`，网络密钥应为 `SSSS-SSSS`。
 例如，房间码 `U/YNZE-U61D-2206-HXRG` 对应的 EasyTier 网络名称和密钥应分别为 `scaffolding-mc-YNZE-U61D` 和 `2206-HXRG`。
 
-## 联机中心发现协议
+## 3.联机中心发现协议
 
 每个 EasyTier 网络有且应仅有一联机中心。
 其 Hostname (https://easytier.cn/guide/network/configurations.html#其他设置) 应当为：
@@ -68,7 +68,7 @@ scaffolding-mc-server-{port: uint16}。
 > [!CAUTION]
 > 若一个 EasyTier 网络中存在多个符合上述协议的联机中心，则将为【未定义行为】
 
-## 联机信息交换协议
+## 4.联机信息交换协议
 
 该协议建立于 TCP 协议之上，地址为联机中心的虚拟 IP 地址，端口为联机中心的 port 参数。
 联机中心将在该接口开放 TCP 服务器，接受符合如下标准的请求（大端序）：
@@ -96,24 +96,24 @@ scaffolding-mc-server-{port: uint16}。
 | [32, 64) | *请求类型*定义的错误 | 若未由*请求类型*明确指出，默认为空 | /       |
 | 255      | 未知错误    | 错误详细内容         | UTF8字符串 |
 
-### 请求类型
+### 4.1 请求类型
 
 请求体和响应体由*请求类型*规定。请求类型分为核心、标准和拓展请求类型
 
-- 核心请求类型：所有联机中心和联机房客都必须完整实现的最小请求类型集合，包括且：`c:ping`, `c:protocols`,` c:server_port`, `c:player_ping`, `c:player_profiles_list`；
+- 核心请求类型：所有联机客户端都必须完整实现的最小请求类型集合，包括且：`c:ping`, `c:protocols`,` c:server_port`, `c:player_ping`, `c:player_profiles_list`；
 - 标准请求类型：由 Scaffolding-MC 规范直接规定的请求类型，以 c (community) 作为命名空间的全部请求类型；
 - 拓展请求类型：由社区自发实现的其他请求类型。
 
 所有核心请求类型都是标准请求类型。
 拓展请求类型的制定者可递交 SEP 来添加特定拓展请求类型到标准请求类型中。
 
-#### 字段解释
+#### 4.1.1 字段解释
 
 ##### machine_id: string
 
 各联机客户端应根据硬件信息生成足够长的字符串，避免碰撞，并尽力保证对同一设备始终产出稳定的结果。
 
-#### 标准请求类型
+#### 4.1.2 标准请求类型
 
 ##### c:ping [核心请求类型]
 
@@ -128,9 +128,9 @@ scaffolding-mc-server-{port: uint16}。
 
 与联机中心协商请求类型列表
 
-- 请求体：联机房客所支持的请求类型列表；
+- 请求体：联机房客支持的请求类型列表；
 - 请求体格式：由 `\0` 分割的多个 ASCII String，如 c:protocols\0c:server_addresses\0c:player_name；
-- 响应体：联机中心所支持的请求类型列表；
+- 响应体：联机中心支持的请求类型列表；
 - 响应体格式：由 `\0` 分割的多个 ASCII String，如 c:protocols\0c:server_addresses\0c:player_name。
 
 ##### c:server_port [核心请求类型]
@@ -155,12 +155,12 @@ scaffolding-mc-server-{port: uint16}。
 - 响应体：玩家列表（包括联机中心）
 - 响应体格式（JSON）：[{ name: string, machine_id: string, vendor: string, kind: 'HOST' | 'GUEST' }]
 
-#### 拓展请求类型
+#### 4.1.3 拓展请求类型
 
 各联机客户端可以自行实现请求类型，选用自己的命名空间。
 请尽量选用联机客户端的名称作为命名空间，以避免命名空间冲突！
 
-## 联机流程
+## 5.联机流程
 
 1. 联机客户端加入对应 EasyTier 网络；
 2. 联机客户端根据联机中心发现协议，确定联机信息交换协议的 TCP 服务器；
