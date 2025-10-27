@@ -101,7 +101,7 @@ machine_id 应足够长，不易在不同设备间发生碰撞，并对相同网
 
 请求体和响应体的具体格式和语义由*动作类型*规定。动作类型分为基本动作、标准动作和扩展动作
 
-- 基本动作：所有联机客户端都必须完整实现的最小动作类型集合，包括：`c:ping`, `c:protocols`,` c:server_port`, `c:player_ping`, `c:player_profiles_list`；
+- 基本动作：所有联机客户端都必须完整实现的最小动作类型集合，包括：`c:ping`, `c:supported_actions`,` c:server_port`, `c:heartbeat`, `c:player_profiles_list`；
 - 标准动作：由 Scaffolding-MC 规范直接规定的动作类型，以 c (community) 作为命名空间的全部动作类型；
 - 扩展动作：社区自发约定实现的其他动作类型。
 
@@ -119,14 +119,14 @@ machine_id 应足够长，不易在不同设备间发生碰撞，并对相同网
 - 响应体：与请求体内容一致
 - 响应体格式：二进制内容，长度应与请求体一致
 
-##### c:protocols [基本动作]
+##### c:supported_actions [基本动作]
 
 与联机中心协商支持的动作类型列表
 
 - 请求体：联机房客支持的动作类型列表；
-- 请求体格式：由 `\0` 分割的多个 ASCII String，如 c:protocols\0c:server_addresses\0c:player_name；
+- 请求体格式：由 `\0` 分割的多个 ASCII String，如 c:supported_actions\0c:server_addresses\0c:player_name；
 - 响应体：联机中心支持的动作类型列表；
-- 响应体格式：由 `\0` 分割的多个 ASCII String，如 c:protocols\0c:server_addresses\0c:player_name。
+- 响应体格式：由 `\0` 分割的多个 ASCII String，如 c:supported_actions\0c:server_addresses\0c:player_name。
 
 ##### c:server_port [基本动作]
 
@@ -138,7 +138,7 @@ machine_id 应足够长，不易在不同设备间发生碰撞，并对相同网
 - 错误状态：
   * 32：服务器未启动
 
-##### c:player_ping [心跳/5秒] [基本动作]
+##### c:heartbeat [心跳/5秒] [基本动作]
 
 - 请求体：玩家 ID 和联机客户端生成的 machine_id
 - 请求体格式（JSON）：{ name: string, machine_id: string, vendor: string }
@@ -163,7 +163,7 @@ machine_id 应足够长，不易在不同设备间发生碰撞，并对相同网
     - 如果网络中找不到合法的联机中心 Hostname，则这不是一个联机房间，联机客户端应提示玩家联机中心发现失败，并终止联机。
     - 网络中有多个合法的联机中心 Hostname 是协议未定义行为。
 
-3. 立刻发送 `c:player_ping` 心跳包（在动作类型协商之前）；
-4. （如果客户端仅支持基本动作，可跳过此步）在联机信息交换协议上发送 `c:protocols`，获取联机中心支持的动作类型，并与当前联机客户端支持的动作类型取交集，确定本次联机可用的全部动作类型；
+3. 立刻发送 `c:heartbeat` 心跳包（在动作类型协商之前）；
+4. （如果客户端仅支持基本动作，可跳过此步）在联机信息交换协议上发送 `c:supported_actions`，获取联机中心支持的动作类型，并与当前联机客户端支持的动作类型取交集，确定本次联机可用的全部动作类型；
 5. 在联机信息交换协议上发送 `c:server_port`，获取Minecraft服务器地址；
-6. 每隔 5s 发送一次 `c:player_ping` 心跳包。
+6. 每隔 5s 发送一次 `c:heartbeat` 心跳包。
