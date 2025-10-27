@@ -26,13 +26,13 @@ SOFTWARE.
 
 # Scaffolding：Minecraft 联机客户端数据交换协议
 
-## 目标
+## 1.目标
 
 - 在 [EasyTier](https://easytier.cn/) 的基础上建立协议；
 - 允许联机客户端相互交换和 Minecraft 联机的相关数据；
 - 带有充足可扩展性：允许各联机客户端自定义扩展协议交换更多数据。
 
-## 名词定义
+## 2.概念定义
 
 - 联机玩家：实际使用联机客户端的自然人；
 - 联机客户端：运行在联机玩家各自的电脑上，拼接参数并拉起 EasyTier 实例的应用程序；
@@ -41,21 +41,21 @@ SOFTWARE.
 - 联机房间：由联机中心和联机房客组成的 EasyTier 网络；
 - 联机房间码：联机房间的唯一标识符，由联机中心生成，通过外部通信方式在联机玩家间传递。
 
-# 协议定义
+# 3.重要字段定义
 
-## 1.联机房间码标准
+## 3.1 联机房间码
 
 联机中心应在 Minecraft 服务器启动后，通过密码学安全的随机数生成器，创建符合 `U/NNNN-NNNN-SSSS-SSSS` 形式的联机房间码，满足以下约束：
 
 - N 和 S 为任意大写字母（除去 I 和 O）和数字；
 - 按照 0-9、A-H、J-N、P-Z顺序映射至 \[0, 33\] 后，依“小端序”读得的整型应能被7整除。
 
-## 2.EasyTier 网络名称标准
+## 3.2 EasyTier 网络名称
 
 若一个联机房间的房间码为`U/NNNN-NNNN-SSSS-SSSS`，则该联机房间的 EasyTier 网络名称应为 `scaffolding-mc-NNNN-NNNN`，网络密钥应为 `SSSS-SSSS`。
 例如，输入联机房间码 `U/YNZE-U61D-2206-HXRG` 后，联机客户端应使用网络密钥 `2206-HXRG` 加入名称为 `scaffolding-mc-YNZE-U61D` 的 Easytier 网络。
 
-## 3.联机中心 Hostname 标准
+## 3.3 联机中心 Hostname
 
 联机中心的 Hostname (https://easytier.cn/guide/network/configurations.html#其他设置) 应为：
 scaffolding-mc-server-{port: uint16}。
@@ -65,14 +65,14 @@ scaffolding-mc-server-{port: uint16}。
 - scaffolding-mc-server-77844：不合法，77844 大于 65535；
 - scaffolding-mc-server-n8：不合法，n8 不是整数。
 
-## 4.联机客户端 machine_id 标准
+## 3.4 联机客户端 machine_id
 
 联机客户端应根据硬件信息生成 machine_id 字符串，作为玩家硬件设备的标识符。
 machine_id 应足够长，不易在不同设备间发生碰撞，并对相同网络终端能产出稳定的结果。
 
-## 5.联机信息交换协议
+# 4.通信定义
 
-该协议是建立于 TCP 协议之上的应用层协议，联机中心应在 EasyTier 上的虚拟 IP 地址和联机中心 Hostname 中 port 参数指示的端口开放 TCP 服务器，接受联机房客符合如下标准的请求（大端序）：
+该协议的通信部分是建立于 TCP 协议之上的应用层协议，联机中心应在 EasyTier 上的虚拟 IP 地址和联机中心 Hostname 中 port 参数指示的端口开放 TCP 服务器，接受联机房客符合如下标准的请求（大端序）：
 
 | 代号     | 偏移量        | 类型     | 解释                                                       |
 |--------|------------|--------|----------------------------------------------------------|
@@ -97,7 +97,7 @@ machine_id 应足够长，不易在不同设备间发生碰撞，并对相同网
 | [32, 64) | *动作类型*定义的错误 | 若未由*动作类型*明确指出，默认为空 | /       |
 | 255      | 未知错误    | 错误详细内容         | UTF8字符串 |
 
-### 5.1 动作类型
+## 4.1 动作类型
 
 请求体和响应体的具体格式和语义由*动作类型*规定。动作类型分为基本动作、标准动作和扩展动作
 
@@ -108,9 +108,9 @@ machine_id 应足够长，不易在不同设备间发生碰撞，并对相同网
 所有基本动作都是标准动作。
 扩展动作的制定者可递交 SEP 来将特定扩展动作添加为标准动作。
 
-#### 5.1.1 标准动作
+### 4.1.1 标准动作
 
-##### c:ping [基本动作]
+#### c:ping [基本动作]
 
 测试联机中心是否正常运行
 
@@ -128,7 +128,7 @@ machine_id 应足够长，不易在不同设备间发生碰撞，并对相同网
 - 响应体：联机中心支持的动作类型列表；
 - 响应体格式：由 `\0` 分割的多个 ASCII String，如 c:protocols\0c:server_addresses\0c:player_name。
 
-##### c:server_port [基本动作]
+#### c:server_port [基本动作]
 
 获取 Minecraft 服务器的地址
 
@@ -144,18 +144,18 @@ machine_id 应足够长，不易在不同设备间发生碰撞，并对相同网
 - 请求体格式（JSON）：{ name: string, machine_id: string, vendor: string }
 - 响应体：空
 
-##### c:player_profiles_list [基本动作]
+#### c:player_profiles_list [基本动作]
 
 - 请求体：空
 - 响应体：玩家列表（包括联机中心）
 - 响应体格式（JSON）：[{ name: string, machine_id: string, vendor: string, kind: 'HOST' | 'GUEST' }]
 
-#### 5.1.2 扩展动作
+### 4.1.2 扩展动作
 
 各联机客户端可以自行约定或实现动作类型，选用自己的命名空间（不能使用c作为命名空间）。
 请尽量选用联机客户端的名称作为命名空间，以避免命名空间冲突！
 
-## 6.联机流程（未完成）
+# 6.标准流程定义（未完成）
 
 1. 联机客户端加入对应 EasyTier 网络；
 2. 联机客户端遍历完整 peer 列表，查找合法的联机中心 Hostname。应该有且只有一个。
